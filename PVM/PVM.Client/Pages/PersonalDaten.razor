@@ -1,0 +1,122 @@
+﻿@page "/personal_daten"
+@using System.Net.Http;
+@using System.Net;
+
+
+<PageTitle>Persnonaldaten</PageTitle>
+
+<form>
+    <div class="form-row">
+        <div class="col-md-4 mb-3">
+            <label>Vorname</label>
+            <input type="text" class="form-control"  value="@employee.Firstname" required>
+        </div>
+        <div class="col-md-4 mb-3">
+            <label>Name</label>
+            <input type="text" class="form-control"  value="@employee.Lastname" required>
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="col-md-4 mb-3">
+            <label>Stelle</label>
+            <input type="text" class="form-control" value="@employee.Position" readonly>
+        </div>
+        <div class="col-md-4 mb-3">
+            <label>Abteilung</label>
+            <input type="text" class="form-control" value="@employee.Department.Name" readonly>
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="col-md-6 mb-3">
+            <label>Straße</label>
+            <input type="text" class="form-control" value="@employee.Address.Street" required>
+        </div>
+        <div class="col-md-3 mb-3">
+            <label>Hausnummer</label>
+            <input type="text" class="form-control" value="@employee.Address.HouseNumber" required>
+        </div>
+        <div class="col-md-3 mb-3">
+            <label>Postleitzahl</label>
+            <input type="number" class="form-control" value="@employee.Address.ZipCode" required>
+        </div>
+        <div class="form-row">
+            <div class="col-md-4 mb-3">
+                <label>Stadt</label>
+                <input type="text" class="form-control" value="@employee.Address.City" required>
+            </div>
+            <div class="col-md-4 mb-3">
+                <label>Land</label>
+                <input type="text" class="form-control" value="@employee.Address.Region" required>
+            </div>
+            <div class="col-md-4 mb-3">
+                <label>Land</label>
+                <input type="text" class="form-control" value="@employee.Address.Country" readonly>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="col-md-4 mb-3">
+                <label>E-Mail Adresse</label>
+                <input type="email" class="form-control" value="@employee.EmailAddress" >
+            </div>
+            <div class="col-md-4 mb-3"> 
+                <label>Telefonnummer</label>
+                <input type="tel" class="form-control" value="@employee.PhoneNumber" >
+            </div>
+        </div>
+        <div class="form-row">
+            <label>Steuer-Id</label>
+            <input type="text" class="form-control" value="@employee.TaxId">
+        </div>
+        <div class="form-row">
+            <div class="col-md-4 mb-3">
+                <label>Geburtsdatum</label>
+                <input type="date" class="form-control" value="@employee.DateOfBirth" required>
+            </div>
+            <div class="input-group col mb-3">
+                <label class="input-group-text">Familienstand</label>
+                <select class="form-select">
+                    <option selected>Auswählen</option>
+                    <option value="1">Ledig</option>
+                    <option value="2">Verheiratet</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <button class="btn btn-primary" type="submit">Speichern</button>
+</form>
+
+
+
+@code {
+    Employee employee = new Employee{
+        Firstname = "Max",
+        Lastname = "Mustermann",
+        Position = "Entwickler",
+        Department = new Department {
+          Name = "Development"
+        },
+        Address = new Address {
+            Street = "Musterstrasse",
+            HouseNumber = "1",
+            ZipCode = 55131,
+            City = "Mainz",
+            Region = "Rheinland-Pfalz",
+            Country = "Deutschland",
+        },
+        EmailAddress = "muster@email.com",
+        PhoneNumber = 123456789,
+        TaxId = "musterId",
+        DateOfBirth = DateOnly.FromDateTime(DateTime.Today),
+        MaritalStatus = ""
+
+    };
+    
+    public string Text = "";
+
+	public void ApplyFilter()
+	{
+		
+	}
+
+}

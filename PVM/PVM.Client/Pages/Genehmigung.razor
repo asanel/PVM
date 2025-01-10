@@ -1,0 +1,171 @@
+﻿@page "/genehmigung"
+@using System
+@using System.Data
+@using Newtonsoft.Json;
+
+@inject NavigationManager NavigationManager
+
+
+<table class="absence-table">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Genehmiger</th>
+            <th>Ersteller</th>
+            <th>Typ</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        @foreach (var entry in approvals)
+        {
+            <tr @onclick="(() => NavigateToApproval(Convert.ToInt32(entry.ID)))">
+                <td>@entry.ID</td>
+                <td>@entry.Approver.Lastname</td>
+                <td>@entry.Creator.Lastname</td>
+                <td>@entry.Type</td>
+                <td>@entry.Status</td>
+            </tr>
+        }
+    </tbody>
+
+
+
+
+</table>
+
+@code {
+    private List<Approval> approvals = new List<Approval>{};
+
+    void NavigateToApproval(int id)
+    {
+        NavigationManager.NavigateTo("/genehmigungansicht/"+id.ToString());
+    }
+
+    // void SomeStartupMethod()
+    // {
+    //     DataTable approvalsTable = new DataTable();
+    //     HttpResponseMessage response = client.GetAsync("GetApprovals?Creator=" + LoggedUser.Id).Result;
+    //     if (response.IsSuccessStatusCode)
+    //     {
+    //         var dataObjects = response.Content.ReadAsStringAsync().Result;
+    //         var result = response.Content.ReadAsStringAsync().Result;
+    //         approvalsTable = JsonConvert.DeserializeObject<DataTable>(result);
+    //     }
+    //     else
+    //     {
+    //         approvalsTable = null;
+    //         Console.WriteLine("{0} ({1})", (int)response.StatusCode, response.ReasonPhrase);
+    //     }
+    //     DataRow drApprover;
+    //     DataRow drCreator;
+    //     foreach (DataRow row in approvalsTable.Rows)
+    //     {
+            
+    //         response = client.GetAsync("GetAccount/" + row.Field<Int64>("Ersteller").ToString()).Result;
+    //         if (response.IsSuccessStatusCode)
+    //         {
+    //             var dataObjects = response.Content.ReadAsStringAsync().Result;
+    //             var result = response.Content.ReadAsStringAsync().Result;
+    //             drCreator = JsonConvert.DeserializeObject<DataTable>(result).Rows[0];
+    //         }
+    //         else
+    //         {
+    //             drCreator = null;
+    //             Console.WriteLine("{0} ({1})", (int)response.StatusCode, response.ReasonPhrase);
+    //         }
+    //         response = client.GetAsync("GetAccount/" + row.Field<Int64>("Genehmiger").ToString()).Result;
+    //         if (response.IsSuccessStatusCode)
+    //         {
+    //             var dataObjects = response.Content.ReadAsStringAsync().Result;
+    //             var result = response.Content.ReadAsStringAsync().Result;
+    //             drApprover = JsonConvert.DeserializeObject<DataTable>(result).Rows[0];
+    //         }
+    //         else
+    //         {
+    //             drApprover = null;
+    //             Console.WriteLine("{0} ({1})", (int)response.StatusCode, response.ReasonPhrase);
+    //         }
+    //         approvals.Add(new Approval { 
+    //             ID = Convert.ToInt32( row.Field<Int64>("GenehmigungID")),
+    //                 ObjectID = Convert.ToInt32(row.Field<Int64>("AbwesenheitID")),
+    //                     Approver = new Employee { Lastname = drApprover.Field<string>("Name") },
+    //                 Creator = new Employee { Lastname = drApprover.Field<string>("Name") },
+    //             Type = row.Field<string>("Typ"),
+    //             Status = row.Field<string>("Status")
+    //         });
+
+    //     }
+
+    // }
+
+    // Task SomeStartupTask()
+    // {
+    //     return Task.CompletedTask;
+    // }
+
+    // protected override async Task OnInitializedAsync()
+    // {
+
+    //     SomeStartupMethod();
+    //     await SomeStartupTask();
+    // }
+
+}
+
+
+<style>
+    .tabs {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 10px;
+    }
+
+    .tab {
+        padding: 5px 10px;
+        border: 1px solid #ddd;
+        cursor: pointer;
+    }
+
+        .tab.selected {
+            background-color: #f2dede;
+        }
+
+    .calendar-placeholder {
+        height: 200px;
+        border: 1px solid #ddd;
+        margin: 10px 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #888;
+    }
+
+    .filter-section {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-top: 10px;
+    }
+
+        .filter-section input[type="date"], .filter-section select {
+            padding: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+    .absence-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+    }
+
+        .absence-table th, .absence-table td {
+            padding: 8px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+</style>
+
+

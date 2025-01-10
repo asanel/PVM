@@ -1,0 +1,139 @@
+﻿@using Newtonsoft.Json
+@using System;
+@using System.Data;
+@using BlazorCalendar;
+@using BlazorCalendar.Models;
+@inject Employee LoggedUser
+@inject NavigationManager NavigationManager
+@page "/neueabwesenheit"
+
+<PageTitle>NeueAbwesenheit</PageTitle>
+<div style="align-items:stretch">
+    <button @onclick="NavigateToAbsences">Zurück</button>
+    <button style="align-self:end" @onclick="SaveRecord">Senden</button>
+</div>
+
+<form class="form-container">
+    <div>
+        <label>Art der Abwesenheit</label>
+        <select class="form-select" @bind="AbsenceEntry.Type">
+            <option value="Urlaub">Urlaub</option>
+            <option value="Krankmeldung">Krankmeldung</option>
+            <option value="Andere">Andere</option>
+        </select>
+    </div>
+
+    <div>
+        <label>Von</label>
+        <input type="date" @bind="StartDate" />
+    </div>
+
+    <div>
+        <label>Bis</label>
+        <input type="date" @bind="EndDate" />
+    </div>
+
+    <div>
+        <label>Genehmiger</label>
+        <input disabled="true" type="text" @bind="approver" />
+    </div>
+
+    <br />
+    
+</form>
+
+
+
+@code {
+    DateTime StartDate = DateTime.Now;
+    DateTime EndDate = DateTime.Now;
+    string approver ;
+    private AbsenceEntry AbsenceEntry = new AbsenceEntry();
+
+   
+    void NavigateToAbsences()
+    {
+        NavigationManager.NavigateTo("/abwesenheitsplan");
+    }
+    // void SomeStartupMethod()
+    // {
+    //     SQLConnection = new ReUseSQL(SQLConnectionConfig);
+    //     approver = LoggedUser.team.Manager.Name;
+
+    // }
+
+    // Task SomeStartupTask()
+    // {
+    //     AbsenceEntry.Type = "Urlaub";
+    //     return Task.CompletedTask;
+    // }
+
+    // protected override async Task OnInitializedAsync()
+    // {
+
+    //     SomeStartupMethod();
+    //     await SomeStartupTask();
+    // }
+
+    async void SaveRecord()
+    {
+        // //?Creator=1&Genehmiger=2&Anfangsdatum=18.11.2024&Enddatum=18.11.2024&Type=sadf
+        // Dictionary<string, string> jsonValues = new Dictionary<string, string>();
+        // /*jsonValues.Add("Creator", "1");
+        // jsonValues.Add("Genehmiger", "2");
+        // jsonValues.Add("Anfangsdatum", "18.11.2024");
+        // jsonValues.Add("Enddatum", "18.11.2024");
+        // jsonValues.Add("Type", "sadf");*/
+
+
+        // //"NewAbsence?Creator=" + LoggedUser.Id + "&Genehmiger=" + LoggedUser.team.Manager.Id + "&Anfangsdatum=" + StartDate.ToString("yyyy-MM-dd") + "&Enddatum=" + EndDate.ToString() + "&Type=" + AbsenceEntry.Type
+        // var stringContent = new StringContent(JsonConvert.SerializeObject(jsonValues));
+        // var response = await client.PostAsync("NewAbsence?Creator=" + LoggedUser.Id + "&Genehmiger=" + LoggedUser.team.Manager.Id + "&Anfangsdatum=18.11.2024&Enddatum=18.11.2024&Type=" + AbsenceEntry.Type, stringContent);
+        // //var response = client.GetAsync("GetTeamAbsenceEntries?Creator=1&Genehmiger=2&Anfangsdatum=18.11.2024&Enddatum=18.11.2024&Type=Test").Result;
+
+        // Console.WriteLine(response.IsSuccessStatusCode);
+        // if (response.IsSuccessStatusCode)
+        // {
+        //     var dataObjects = response.Content.ReadAsStringAsync().Result;
+        //     var result = response.Content.ReadAsStringAsync().Result;
+
+        // }
+        // else
+        // {
+        //     Console.WriteLine("{0} ({1})", (int)response.StatusCode, response.ReasonPhrase);
+        // }
+        
+        NavigationManager.NavigateTo("/abwesenheitsplan");
+    }
+}
+<style>
+    .form-container {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        max-width: 300px;
+    }
+    .form-container div {
+        display: flex;
+        flex-direction: column;
+    }
+    label {
+        font-weight: bold;
+    }
+    input[type="text"], input[type="date"], textarea {
+        padding: 5px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+    }
+    button {
+        padding: 8px 12px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+    button:hover {
+        background-color: #0056b3;
+    }
+</style>

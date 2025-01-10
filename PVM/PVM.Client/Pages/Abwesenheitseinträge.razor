@@ -1,0 +1,74 @@
+﻿@using PVM.Models
+
+@page "/eintraege"
+
+<form class="form-container">
+    <div>
+        <label>Art der Abwesenheit</label>
+        <select class="form-select" @bind="AbsenceEntry.Type">
+            <option value="0">Urlaub</option>
+            <option value="1">Krankmeldung</option>
+            <option value="2">Andere</option>
+        </select>
+    </div>
+
+    <div>
+        <label>Von</label>
+        <input type="date" @bind="AbsenceEntry.StartDate" />
+    </div>
+
+    <div>
+        <label>Bis</label>
+        <input type="date" @bind="AbsenceEntry.EndDate" />
+    </div>
+
+    <div>
+        <label>Genehmiger</label>
+        <input type="text" />
+    </div>
+
+
+    <button>Senden</button>
+</form>
+
+        
+
+
+    @code {
+        private AbsenceEntry AbsenceEntry = new AbsenceEntry();
+        
+    }
+
+    <style>
+        .form-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            max-width: 300px;
+        }
+        .form-container div {
+            display: flex;
+            flex-direction: column;
+        }
+        label {
+            font-weight: bold;
+        }
+        input[type="text"], input[type="date"], textarea {
+            padding: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            padding: 8px 12px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+
+

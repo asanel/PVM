@@ -1,0 +1,140 @@
+﻿@page "/genehmigungansicht/{id}"
+@page "/genehmigungansicht"
+@using System
+@using System.Data
+@using BlazorCalendar
+@using BlazorCalendar.Models
+
+@inject NavigationManager NavigationManager
+
+
+
+<div style="align-items:stretch">
+    <button @onclick="NavigateToApprovals">Zurück</button>
+ </div>
+<form class="form-container">
+    <div>
+        <label>Ersteller</label>
+        <input disabled="true" class="text" @bind="approval.Creator.Lastname"/>
+    </div>
+
+    <div>
+        <label>Genehmiger</label>
+        <input disabled="true" type="text" @bind="approval.Approver.Lastname" />
+    </div>
+
+    <div>
+        <label>Art</label>
+        <input disabled="true" type="text" @bind="approval.Type" />
+    </div>
+
+    <div>
+        <label>Status</label>
+        <input disabled="true" type="text" @bind="approval.Status" />
+    </div>
+    <div>
+        <label>*Kommentar</label>
+        <input type="text" @bind="approval.Comment" />
+    </div>
+
+</form>
+
+<div  class="footer">
+    <button @onclick="Reject" style="align-self:end"> Reject </button>
+    <button @onclick="Approve" style="align-self:end"> Approver </button>
+</div>
+
+
+
+
+@code {
+    [Parameter]
+    public string? id { get; set; }
+    public Approval approval = new Approval();
+
+    // public ReUseSQL SQLConnection;
+
+    void Approve()
+    {
+        // SQLConnection.SaveRecord("UPDATE Genehmigung SET Status = 'Genehmigt' WHERE GenehmigungID = '" + approval.ID);
+        // SQLConnection.SaveRecord("UPDATE Abwesenheitsantraege SET Status = 'Genehmigt' WHERE AbwesenheitsantragID = '" + approval.ObjectID);
+    }
+    void Reject()
+    {
+
+    }
+
+    void NavigateToApprovals()
+    {
+        NavigationManager.NavigateTo("/genehmigung");
+    }
+
+
+    // void SomeStartupMethod()
+    // {
+    //     SQLConnection = new ReUseSQL(SQLConnectionConfig);
+    //     DataRow dr = SQLConnection.GetReference("Genehmigungen", "GenehmigungID", id);
+    //     DataRow drApprover = SQLConnection.GetReference("Konten", "KontoID", dr.Field<int>("Genehmiger").ToString());
+    //     DataRow drCreator = SQLConnection.GetReference("Konten", "KontoID", dr.Field<int>("Ersteller").ToString());
+    //     approval.Creator = new Employee {Name = drCreator.Field<string>("Name"),  Id = dr.Field<int>("Genehmiger") };
+    //     approval.Approver = new Employee { Name = drApprover.Field<string>("Name"),  Id = dr.Field<int>("Ersteller") };
+    //     approval.Type = dr.Field<string>("Typ");
+    //     approval.Status = dr.Field<string>("Status");
+    //     approval.Comment = dr.Field<string>("Kommentar");
+    //     approval.ObjectID = dr.Field<int>("AbwesenheitID");
+
+    // }
+
+    // Task SomeStartupTask()
+    // {
+    //     return Task.CompletedTask;
+    // }
+
+    // protected override async Task OnInitializedAsync()
+    // {
+
+    //     SomeStartupMethod();
+    //     await SomeStartupTask();
+    // }
+
+
+}
+
+
+<style>
+    .form-container {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        max-width: 300px;
+    }
+    .form-container div {
+        display: flex;
+        flex-direction: column;
+    }
+    label {
+        font-weight: bold;
+    }
+    input[type="text"], input[type="date"], textarea {
+        padding: 5px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+    }
+    button {
+        padding: 8px 12px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+    button:hover {
+        background-color: #0056b3;
+    }
+    .footer {
+        position:fixed;
+        bottom: 10px;
+        width: 100%;
+    }
+
+</style>
