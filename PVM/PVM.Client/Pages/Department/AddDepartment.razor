@@ -1,0 +1,39 @@
+﻿@page "/addDepartment"
+@using PVM.Client.Service.Repository
+
+
+@inject IDepartmentRepository departmentService;
+@inject HttpClient httpClient;
+@inject NavigationManager NavigationManager;
+
+<h3>Abteilung</h3>
+
+<div class="row">
+    <div class="col-md-12">
+        <EditForm Model="department" OnValidSubmit="AddNewDepartment" FormName="adddepartment">
+            <div class="row">
+                <label>Name</label>
+                <InputText type="text" class="form-control" @bind-value="department.Name" />
+            </div>
+
+            <button class="btn btn-primary" type="submit">Hinzufügen</button>
+        </EditForm>
+    </div>
+</div>
+
+@code{
+    [SupplyParameterFromForm]
+    private Department department { get; set; } = new();
+    protected async Task AddNewDepartment()
+    {
+        var response = await departmentService.AddDepartmentAsync(department);
+        if(response != null)
+        {
+            NavigationManager.NavigateTo("/departments_list");
+        }
+       
+    }
+}
+
+
+

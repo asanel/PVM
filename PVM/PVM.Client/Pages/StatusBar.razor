@@ -1,0 +1,64 @@
+﻿@if (IsVisible)
+{
+    <div class="status-bar @StatusClass">
+        @Message
+        <button @onclick="CloseStatusBar">✖</button>
+    </div>
+}
+
+@code {
+    [Parameter] public bool IsVisible { get; set; }
+    [Parameter] public string Message { get; set; }
+    [Parameter] public string StatusClass { get; set; } = "info"; // Klassen: info, success, error
+    [Parameter] public EventCallback<bool> IsVisibleChanged { get; set; } // Notify parent
+    private void CloseStatusBar()
+    {
+        IsVisible = false;
+        if (IsVisibleChanged.HasDelegate)
+        {
+            IsVisibleChanged.InvokeAsync(false);
+        }
+        StateHasChanged();
+    }
+}
+
+<style>
+    .status-bar {
+        position: fixed; /* Fest positioniert */
+        bottom: 0; /* Am unteren Rand der Seite */
+        left: 0; /* Am linken Rand beginnen */
+        width: 100%; /* Breite der StatusBar */
+        padding: 10px 20px; /* Innenabstand */
+        text-align: center; /* Textzentrierung */
+        font-size: 16px; /* Schriftgröße */
+        color: white; /* Textfarbe */
+        z-index: 1000; /* Im Vordergrund */
+        opacity: 0.9; /* Halb transparent */
+        transition: opacity 0.3s ease-in-out;
+    }
+
+        .status-bar.info {
+            background-color: rgba(0, 123, 255, 0.8); /* Halb transparentes Blau */
+        }
+
+        .status-bar.success {
+            background-color: rgba(40, 167, 69, 0.8); /* Halb transparentes Grün */
+        }
+
+        .status-bar.error {
+            background-color: rgba(220, 53, 69, 0.8); /* Halb transparentes Rot */
+        }
+
+        .status-bar button {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 18px;
+            margin-left: 20px;
+            cursor: pointer;
+        }
+
+            .status-bar button:hover {
+                opacity: 0.7;
+            }
+</style>

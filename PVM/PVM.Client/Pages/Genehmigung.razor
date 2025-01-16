@@ -9,7 +9,7 @@
 <table class="absence-table">
     <thead>
         <tr>
-            <th>ID</th>
+            <th>Id</th>
             <th>Genehmiger</th>
             <th>Ersteller</th>
             <th>Typ</th>
@@ -20,8 +20,8 @@
     <tbody>
         @foreach (var entry in approvals)
         {
-            <tr @onclick="(() => NavigateToApproval(Convert.ToInt32(entry.ID)))">
-                <td>@entry.ID</td>
+            <tr @onclick="(() => NavigateToApproval(Convert.ToInt32(entry.Id)))">
+                <td>@entry.Id</td>
                 <td>@entry.Approver.Lastname</td>
                 <td>@entry.Creator.Lastname</td>
                 <td>@entry.Type</td>

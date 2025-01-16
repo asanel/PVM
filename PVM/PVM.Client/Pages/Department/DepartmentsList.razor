@@ -1,0 +1,78 @@
+﻿@page "/departments_list"
+@using PVM.Client.Service
+@using PVM.Client.Service.Repository
+@inject NavigationManager navigation;
+@inject IJSRuntime JsRuntime
+@inject IDepartmentRepository DepartmentService;
+@inject HttpClient httpClient;
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Abteilungen</h3>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <p><a class="btn btn-success float-end" href="/addDepartment">Abteilung hinzufügen</a></p>
+                    <div class="col-md-12">
+                        <div class="card">
+                            <div class="card-header"></div>
+                            @if (!AllDepartments.Any())
+                            {
+                                <p><em>Loading Countries...</em></p>
+                            }
+                            @if (AllDepartments.Any())
+                            {
+                                <div class="card-body">
+                                    <table class="table table-striped table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Id</th>
+                                                <th>Abteilung</th>  
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var department in AllDepartments)
+                                            {
+                                                <tr>
+                                                    <td>@department.Id</td>
+                                                    <td>@department.Name</td>
+
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="alert alert-info"> There is no Department List Availlable</div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    public List<Department> AllDepartments { get; set; } = new();
+
+    public Department department = new Department();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadAllDepartments();
+    }
+    public async Task LoadAllDepartments()
+    {
+        // DepartmentService departmentService = new DepartmentService(httpClient);
+        var departments = await DepartmentService.GetAllDepartmentsAsync();
+        if (departments is null) return;
+
+        AllDepartments.Clear();
+
+        AllDepartments.AddRange(departments);
+    }
+}

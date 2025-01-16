@@ -1,9 +1,10 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using PVM.Data;
+using System.ComponentModel.DataAnnotations;
 
 namespace PVM.Models
 {
-	public class Manager 
-    {
+	public class Manager
+	{
 		[Key]
 		public int Id { get; set; }
 		public string Lastname { get; set; }
@@ -18,7 +19,7 @@ namespace PVM.Models
 		public string EmailAddress { get; set; }
 		public int DepartmentId { get; set; }
 		public Department Department { get; set; }
-		//public ApplicationUser ApplicationUser { get; set; }
 		public string ApplicationUserId { get; set; }
+		public ApplicationUser ApplicationUser { get; set; }
 	}
 }

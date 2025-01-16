@@ -1,0 +1,253 @@
+﻿@page "/register_newUser"
+
+
+@using Microsoft.AspNetCore.Identity
+@using PVM.Client.Service.Repository
+@using PVM.Data
+
+
+
+@inject UserManager<ApplicationUser> userManager
+@inject IUserStore<ApplicationUser> userStore
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JsRuntime
+
+@inject IAccountRepository AccountService
+
+<h3>Neuen Mitarbeiter registrieren</h3>
+
+<div class="row">
+    <div class="col-md-12">
+        <EditForm Model="Model" OnInvalidSubmit="RegisterUser" method="post" FormName="adduser">
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label>Vorname</label>
+                    <InputText type="text" class="form-control" @bind-value="Model.Firstname" required/>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label>Name</label>
+                    <InputText type="text" class="form-control" @bind-value="Model.Lastname" required/>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label>Stelle</label>
+                    <InputText type="text" class="form-control" @bind-value="Model.Position" required/>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label>Abteilung</label>
+                    <InputSelect class="form-control" @bind-value="Model.DepartmentId"/>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label>Straße</label>
+                    <InputText type="text" class="form-control" @bind-value="Model.Street" required/>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label>Hausnummer</label>
+                    <InputText type="text" class="form-control" @bind-value="Model.HouseNumber" required/>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label>Postleitzahl</label>
+                    <InputNumber class="form-control" @bind-value="Model.ZipCode" />
+                </div>
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label>Stadt</label>
+                        <InputText type="text" class="form-control" @bind-value="Model.City" required/>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label>Bundesland</label>
+                        <InputText type="text" class="form-control" @bind-value="Model.Region" required/>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label>Land</label>
+                        <InputText type="text" class="form-control" @bind-value="Model.Country" required/>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label>E-Mail Adresse</label>
+                        <InputText type="email" class="form-control" @bind-value="Model.EmailAddress" />
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label>Telefonnummer</label>
+                        <InputText class="form-control" @bind-value="Model.PhoneNumber" />
+                    </div>
+                </div>
+                <div class="row">
+                    <label>Steuer-Id</label>
+                    <InputText type="text" class="form-control" @bind-value="Model.TaxId"/>
+                </div>
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label>Geburtsdatum</label>
+                        <InputDate class="form-control" @bind-value="Model.DateOfBirth" />
+                    </div>
+                    <div class="input-group col mb-3">
+                        <label class="input-group-text">Familienstand</label>
+                        <InputSelect class="form-control" @bind-value="Model.MaritalStatus">
+                            <option selected>Auswählen</option>
+                            <option value="Ledig">Ledig</option>
+                            <option value="Verheiratet">Verheiratet</option>
+                        </InputSelect>
+                    </div>
+                    <!-- Rolle -->
+                    <div>
+                        <label for="IsManager">Manager?</label>
+                        <InputCheckbox @bind-value="Model.IsManager" />
+                    </div>
+                    <div>
+                        <label for="IsManager">Admin?</label>
+                        <InputCheckbox @bind-value="Model.IsAdmin"/>
+                    </div>
+                </div>
+            </div>
+            <button class="btn btn-primary" type="submit">Registrieren</button>
+        </EditForm>
+    </div>
+</div>
+
+
+
+@code {
+    private IEnumerable<IdentityError>? identityErrors;
+
+    [SupplyParameterFromForm]
+    private RegisterViewModel Model { get; set; } = new ();
+    private string? Message => identityErrors is null ? null : $"Error: {string.Join(", ", identityErrors.Select(error => error.Description))}";
+
+
+    protected async Task RegisterUser() 
+    {
+        this.CreateAccessData();
+
+        Address address = this.CreateAddress();
+        // Manager manager = this.CreateManager();
+        Employee employee = this.CreateEmployee();
+        var result = await this.RegisterUserAsync(Model, employee, address);
+        if (!result.Succeeded)
+        {
+            identityErrors = result.Errors;
+            return;
+        }
+    }
+
+    private Address CreateAddress(){
+        Address address = new Address();
+        address.Country = Model.Country;
+        address.City = Model.City;
+        address.Street = Model.Street;
+        address.HouseNumber = Model.HouseNumber;
+        address.Region = Model.Region;
+        address.ZipCode = Model.ZipCode;
+        return address;
+    }
+
+    // private Manager CreateManager(){
+    //     Manager manager = new Manager();
+    //     manager.Firstname = Model.Firstname;
+    //     manager.Lastname = Model.Lastname;
+    //     manager.Position = Model.Position;
+    //     manager.DepartmentId = 1;
+    //     manager.EmailAddress = Model.EmailAddress;
+    //     manager.PhoneNumber = Model.PhoneNumber;
+    //     manager.TaxId = Model.TaxId;
+    //     manager.DateOfBirth = Model.DateOfBirth;
+    //     manager.MaritalStatus = Model.MaritalStatus;
+    //     return manager;
+    // }
+
+    private Employee CreateEmployee()
+    {
+        Employee employee = new Employee();
+        employee.Firstname = Model.Firstname;
+        employee.Lastname = Model.Lastname;
+        employee.Position = Model.Position;
+        employee.DepartmentId = 1;
+        employee.EmailAddress = Model.EmailAddress;
+        employee.PhoneNumber = Model.PhoneNumber;
+        employee.TaxId = Model.TaxId;
+        employee.DateOfBirth = Model.DateOfBirth;
+        employee.MaritalStatus = Model.MaritalStatus;
+        employee.IsManager = Model.IsManager;
+        return employee;
+    }
+
+    private void CreateAccessData()
+    {
+        Model.Username = $"{Model.Firstname[0]}{Model.Lastname}";
+        Model.Password = "Password1A!";
+
+    }
+    private async Task<IdentityResult> RegisterUserAsync(RegisterViewModel model, Employee employee, Address address)
+    {
+        if (model == null) { throw new ArgumentNullException(nameof(model)); }
+
+
+        // Benutzer erstellen
+        var user = new ApplicationUser();
+        await userStore.SetUserNameAsync(user, model.Username, CancellationToken.None);
+
+
+        string userId = await userManager.GetUserIdAsync(user);
+        user.EmailConfirmed = true;
+        user.PhoneNumberConfirmed = true;
+        user.Email = $"test@test.com";
+
+
+        if (model.IsManager)
+        {
+            
+            //Addresse erstellen
+            Address newAddress = await AccountService.AddAddressAsync(address);
+            //Beziehung herstellen
+            employee.AddressId = newAddress.Id;
+            employee.ApplicationUserId = userId;
+            // Employee erstellen
+            Employee newEmployee = await AccountService.AddEmployeeAsync(employee);
+
+            // Beziehung herstellen
+            user.EmployeeId = employee.Id;
+            await userManager.AddToRoleAsync(user, "Manager");
+
+        }
+        else if (model.IsAdmin)
+        {
+            //Addresse erstellen
+            Address newAddress = await AccountService.AddAddressAsync(address);
+            //Beziehung herstellen
+            employee.AddressId = newAddress.Id;
+            employee.ApplicationUserId = userId;
+            // Employee erstellen
+            Employee newEmployee = await AccountService.AddEmployeeAsync(employee);
+
+            // Beziehung herstellen
+            user.EmployeeId = employee.Id;
+            await userManager.AddToRoleAsync(user, "Admin");
+        }
+        else
+        {
+
+            //Addresse erstellen
+            Address newAddress = await AccountService.AddAddressAsync(address);
+            //Beziehung herstellen
+            employee.AddressId = newAddress.Id;
+            employee.ApplicationUserId = userId;
+            // Employee erstellen
+            Employee newEmployee = await AccountService.AddEmployeeAsync(employee);
+
+            // Beziehung herstellen
+            user.EmployeeId = employee.Id;
+            await userManager.AddToRoleAsync(user, "User");
+        }
+
+        await userManager.UpdateAsync(user);
+
+        var result = await userManager.CreateAsync(user, model.Password);
+
+        return result;
+    }
+
+}

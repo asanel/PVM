@@ -1,16 +1,18 @@
-using Microsoft.AspNetCore.Identity;
-using PVM.Models;
-using System.ComponentModel.DataAnnotations;
+//using Microsoft.AspNetCore.Identity;
+//using PVM.Models;
+//using System.ComponentModel.DataAnnotations;
 
-namespace PVM.Data
-{
-    // Add profile data for application users by adding properties to the ApplicationUser class
-    public class ApplicationUser : IdentityUser
-    {
-        public Employee Employee { get; set; }  
+//namespace PVM.Data
+//{
+//    // Add profile data for application users by adding properties to the ApplicationUser class
+//    public class ApplicationUser : IdentityUser
+//    {
 
-        public Manager Manager { get; set; }    
+//		public int EmployeeId { get; set; }
+//        public Employee Employee { get; set; } 
+//        public int ManagerId { get; set; }
+//        public Manager Manager { get; set; }    
 
-    }
+//    }
 
-}
+//}

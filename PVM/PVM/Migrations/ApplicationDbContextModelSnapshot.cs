@@ -174,6 +174,9 @@ namespace PVM.Migrations
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("bit");
 
+                    b.Property<int>("EmployeeId")
+                        .HasColumnType("int");
+
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("bit");
 
@@ -208,6 +211,9 @@ namespace PVM.Migrations
                         .HasColumnType("nvarchar(256)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("EmployeeId")
+                        .IsUnique();
 
                     b.HasIndex("NormalizedEmail")
                         .HasDatabaseName("EmailIndex");
@@ -286,7 +292,7 @@ namespace PVM.Migrations
 
                     b.Property<string>("ApplicationUserId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateOnly>("DateOfBirth")
                         .HasColumnType("date");
@@ -302,11 +308,18 @@ namespace PVM.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("IsManager")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Lastname")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("MaritalStatus")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PhoneNumber")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -321,73 +334,11 @@ namespace PVM.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("AddressId")
-                        .IsUnique();
-
-                    b.HasIndex("ApplicationUserId")
                         .IsUnique();
 
                     b.HasIndex("DepartmentId");
 
                     b.ToTable("Employees");
-                });
-
-            modelBuilder.Entity("PVM.Models.Manager", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("AddressId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("ApplicationUserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<DateOnly>("DateOfBirth")
-                        .HasColumnType("date");
-
-                    b.Property<int>("DepartmentId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("EmailAddress")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Firstname")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Lastname")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("MaritalStatus")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Position")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("TaxId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AddressId")
-                        .IsUnique();
-
-                    b.HasIndex("ApplicationUserId")
-                        .IsUnique();
-
-                    b.HasIndex("DepartmentId")
-                        .IsUnique();
-
-                    b.ToTable("Managers");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -441,6 +392,17 @@ namespace PVM.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("PVM.Data.ApplicationUser", b =>
+                {
+                    b.HasOne("PVM.Models.Employee", "Employee")
+                        .WithOne("ApplicationUser")
+                        .HasForeignKey("PVM.Data.ApplicationUser", "EmployeeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Employee");
+                });
+
             modelBuilder.Entity("PVM.Models.Employee", b =>
                 {
                     b.HasOne("PVM.Models.Address", "Address")
@@ -449,66 +411,20 @@ namespace PVM.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("PVM.Data.ApplicationUser", "ApplicationUser")
-                        .WithOne("Employee")
-                        .HasForeignKey("PVM.Models.Employee", "ApplicationUserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("PVM.Models.Department", "Department")
-                        .WithMany("Employees")
+                        .WithMany()
                         .HasForeignKey("DepartmentId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Address");
-
-                    b.Navigation("ApplicationUser");
-
-                    b.Navigation("Department");
-                });
-
-            modelBuilder.Entity("PVM.Models.Manager", b =>
-                {
-                    b.HasOne("PVM.Models.Address", "Address")
-                        .WithOne()
-                        .HasForeignKey("PVM.Models.Manager", "AddressId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("PVM.Data.ApplicationUser", "ApplicationUser")
-                        .WithOne("Manager")
-                        .HasForeignKey("PVM.Models.Manager", "ApplicationUserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("PVM.Models.Department", "Department")
-                        .WithOne("Manager")
-                        .HasForeignKey("PVM.Models.Manager", "DepartmentId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.Navigation("Address");
-
-                    b.Navigation("ApplicationUser");
 
                     b.Navigation("Department");
                 });
 
-            modelBuilder.Entity("PVM.Data.ApplicationUser", b =>
+            modelBuilder.Entity("PVM.Models.Employee", b =>
                 {
-                    b.Navigation("Employee")
-                        .IsRequired();
-
-                    b.Navigation("Manager")
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("PVM.Models.Department", b =>
-                {
-                    b.Navigation("Employees");
-
-                    b.Navigation("Manager")
+                    b.Navigation("ApplicationUser")
                         .IsRequired();
                 });
 #pragma warning restore 612, 618

@@ -1,122 +1,202 @@
 ﻿@page "/personal_daten"
 @using System.Net.Http;
 @using System.Net;
+@using PVM.Client.Service
+@using PVM.Models;
+@using PVM.Client.Service.Repository;
 
+@inject IAccountRepository accountService;
+@inject IDepartmentRepository departmentService;
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject HttpClient httpClient;
 
 <PageTitle>Persnonaldaten</PageTitle>
 
-<form>
+@if (editModel == null)
+{
+    <p>Daten werden geladen...</p>
+}
+
+<EditForm Model="editModel" OnValidSubmit="SaveEmployee" FormName="updateEmployee">
     <div class="form-row">
         <div class="col-md-4 mb-3">
             <label>Vorname</label>
-            <input type="text" class="form-control"  value="@employee.Firstname" required>
+            <InputText class="form-control" @bind-Value="@editModel.Employee.Firstname" />
         </div>
         <div class="col-md-4 mb-3">
             <label>Name</label>
-            <input type="text" class="form-control"  value="@employee.Lastname" required>
+            <InputText class="form-control" @bind-Value="@editModel.Employee.Lastname" />
         </div>
     </div>
+
     <div class="form-row">
         <div class="col-md-4 mb-3">
             <label>Stelle</label>
-            <input type="text" class="form-control" value="@employee.Position" readonly>
+            <InputText class="form-control" @bind-Value="@editModel.Employee.Position" readonly />
         </div>
         <div class="col-md-4 mb-3">
-            <label>Abteilung</label>
-            <input type="text" class="form-control" value="@employee.Department.Name" readonly>
+            <label>Stelle</label>
+            <InputText class="form-control" @bind-Value="@editModel.Department" readonly />
         </div>
     </div>
+
     <div class="form-row">
         <div class="col-md-6 mb-3">
             <label>Straße</label>
-            <input type="text" class="form-control" value="@employee.Address.Street" required>
+            <InputText class="form-control" @bind-Value="@editModel.Address.Street"/>
         </div>
         <div class="col-md-3 mb-3">
             <label>Hausnummer</label>
-            <input type="text" class="form-control" value="@employee.Address.HouseNumber" required>
+            <InputText class="form-control" @bind-Value="@editModel.Address.HouseNumber" />
         </div>
         <div class="col-md-3 mb-3">
             <label>Postleitzahl</label>
-            <input type="number" class="form-control" value="@employee.Address.ZipCode" required>
+            <InputNumber class="form-control" @bind-Value="@editModel.Address.ZipCode" />
         </div>
-        <div class="form-row">
-            <div class="col-md-4 mb-3">
-                <label>Stadt</label>
-                <input type="text" class="form-control" value="@employee.Address.City" required>
-            </div>
-            <div class="col-md-4 mb-3">
-                <label>Land</label>
-                <input type="text" class="form-control" value="@employee.Address.Region" required>
-            </div>
-            <div class="col-md-4 mb-3">
-                <label>Land</label>
-                <input type="text" class="form-control" value="@employee.Address.Country" readonly>
-            </div>
+    </div>
+
+    <div class="form-row">
+        <div class="col-md-4 mb-3">
+            <label>Stadt</label>
+            <InputText class="form-control" @bind-Value="@editModel.Address.City" />
         </div>
-        <div class="form-row">
-            <div class="col-md-4 mb-3">
-                <label>E-Mail Adresse</label>
-                <input type="email" class="form-control" value="@employee.EmailAddress" >
-            </div>
-            <div class="col-md-4 mb-3"> 
-                <label>Telefonnummer</label>
-                <input type="tel" class="form-control" value="@employee.PhoneNumber" >
-            </div>
+        <div class="col-md-4 mb-3">
+            <label>Land</label>
+            <InputText class="form-control" @bind-Value="@editModel.Address.Region" />
         </div>
-        <div class="form-row">
-            <label>Steuer-Id</label>
-            <input type="text" class="form-control" value="@employee.TaxId">
+        <div class="col-md-4 mb-3">
+            <label>Land</label>
+            <InputText class="form-control" @bind-Value="@editModel.Address.Country" readonly />
         </div>
-        <div class="form-row">
-            <div class="col-md-4 mb-3">
-                <label>Geburtsdatum</label>
-                <input type="date" class="form-control" value="@employee.DateOfBirth" required>
-            </div>
-            <div class="input-group col mb-3">
-                <label class="input-group-text">Familienstand</label>
-                <select class="form-select">
-                    <option selected>Auswählen</option>
-                    <option value="1">Ledig</option>
-                    <option value="2">Verheiratet</option>
-                </select>
-            </div>
+    </div>
+
+    <div class="form-row">
+        <div class="col-md-4 mb-3">
+            <label>E-Mail Adresse</label>
+            <InputText type="email" class="form-control" @bind-Value="@editModel.Employee.EmailAddress" />
+        </div>
+        <div class="col-md-4 mb-3">
+            <label>Telefonnummer</label>
+            <InputText type="tel" class="form-control" @bind-Value="@editModel.Employee.PhoneNumber" />
+        </div>
+    </div>
+
+    <div class="form-row">
+        <label>Steuer-Id</label>
+        <InputText class="form-control" @bind-Value="@editModel.Employee.TaxId" />
+    </div>
+
+    <div class="form-row">
+        <div class="col-md-4 mb-3">
+            <label>Geburtsdatum</label>
+            <InputDate class="form-control" @bind-Value="@editModel.Employee.DateOfBirth" />
+        </div>
+        <div class="input-group col-md-4 mb-3">
+            <label class="input-group-text">Familienstand</label>
+            <InputSelect class="form-control" @bind-Value="@editModel.Employee.MaritalStatus">
+                <option value="">@editModel.Employee.MaritalStatus</option>
+                <option value="1">Ledig</option>
+                <option value="2">Verheiratet</option>
+            </InputSelect>
         </div>
     </div>
 
     <button class="btn btn-primary" type="submit">Speichern</button>
-</form>
+
+</EditForm>
+
 
 
 
 @code {
-    Employee employee = new Employee{
-        Firstname = "Max",
-        Lastname = "Mustermann",
-        Position = "Entwickler",
-        Department = new Department {
-          Name = "Development"
-        },
-        Address = new Address {
-            Street = "Musterstrasse",
-            HouseNumber = "1",
-            ZipCode = 55131,
-            City = "Mainz",
-            Region = "Rheinland-Pfalz",
-            Country = "Deutschland",
-        },
-        EmailAddress = "muster@email.com",
-        PhoneNumber = 123456789,
-        TaxId = "musterId",
-        DateOfBirth = DateOnly.FromDateTime(DateTime.Today),
-        MaritalStatus = ""
+    [SupplyParameterFromForm]
+    public EditEmployeeModel editModel { get; set; } = new();
 
-    };
-    
-    public string Text = "";
+    private async Task SaveEmployee()
+    {
+        try
+        {
 
-	public void ApplyFilter()
-	{
-		
-	}
+            Console.WriteLine("Personal Daten updaten...");
+
+            Employee employee = new();
+            employee = editModel.Employee;
+            employee.Address = employee.Address;
+
+            
+            var result = await accountService.UpdateEmployeeAsync(employee);
+            // Simuliere Speichern
+            if (result != null)
+            {
+
+                Console.WriteLine("Daten erfolgreich gespeichert!");
+            }
+
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Fehler beim Speichern der Daten: {ex.Message}");
+        }
+
+
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            editModel = await this.LoadEmployee();
+
+            Console.WriteLine("Daten erfolgreich geladen.");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Fehler beim Laden der Daten: {ex.Message}");
+        }
+
+
+
+    }
+
+    private async Task<EditEmployeeModel> LoadEmployee()
+    {
+        EditEmployeeModel result = new();
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity != null && user.Identity.IsAuthenticated)
+        {
+            var userId = user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            // Sende die GET-Anfrage und prüfe auf Erfolg
+            var response = await accountService.GetEmployeeByUserIdAsync(userId);
+            if (response != null)
+            {
+
+                result.Employee = response;
+                result.Address = response.Address;
+                result.Department = response.Department.Name;
+            }
+
+
+        }
+        return result;
+    }
+
+    public class EditEmployeeModel
+    {
+        public Employee Employee { get; set; } = new();
+        public Address Address { get; set; } = new();
+        public string Department { get; set; }
+    }
+
+
+ 
+
+
+
+  
+   
+
 
 }
+

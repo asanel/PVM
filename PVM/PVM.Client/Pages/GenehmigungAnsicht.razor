@@ -11,7 +11,7 @@
 
 <div style="align-items:stretch">
     <button @onclick="NavigateToApprovals">Zurück</button>
- </div>
+</div>
 <form class="form-container">
     <div>
         <label>Ersteller</label>
@@ -50,6 +50,8 @@
 @code {
     [Parameter]
     public string? id { get; set; }
+    public Manager manager = new Manager();
+    public Employee employee = new Employee();
     public Approval approval = new Approval();
 
     // public ReUseSQL SQLConnection;
