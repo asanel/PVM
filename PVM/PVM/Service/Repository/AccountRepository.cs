@@ -2,6 +2,7 @@
 using PVM.Client.Service.Repository;
 using PVM.Data;
 using PVM.Models;
+using PVM.Shared.DTOs;
 using System.Diagnostics.Metrics;
 
 namespace PVM.Service.Repository
@@ -36,21 +37,39 @@ namespace PVM.Service.Repository
 
 		public async Task<Employee> GetEmployeeByIdAsync(int id)
 		{
-			var singleEmployee = await context.Employees.Where(x => x.Id == id)
-								.Include(e => e.Address) // Address einbeziehen
+			var singleEmployee = await context.Employees
 								.Include(e => e.Department)
-								.Include(e => e.ApplicationUser)
-								.FirstOrDefaultAsync();
+								.Include(e => e.Address)
+								.FirstOrDefaultAsync(x => x.Id == id);
 			if (singleEmployee == null) return null;
 			return singleEmployee;
 		}
 
-		public async Task<Employee> UpdateEmployeeAsync(Employee employee)
+		public async Task<Employee> UpdateEmployeeAsync(EmployeeDto employee)
 		{
-			if (employee == null) return null;
+			Employee employeeModel = new Employee();
+
+			if (employee == null) 
+			{ return null; }
+			else
+			{
+				employeeModel.Id = employee.Id;
+				employeeModel.AddressId = employee.AddressId;
+				employeeModel.EmailAddress = employee.EmailAddress;
+				employeeModel.DateOfBirth = employee.DateOfBirth;
+				employeeModel.Firstname = employee.Firstname;
+				employeeModel.Lastname = employee.Lastname;
+				employeeModel.IsManager = employee.IsManager;
+				employeeModel.MaritalStatus = employee.MaritalStatus;
+				employeeModel.Position = employee.Position;
+				employeeModel.DepartmentId = employee.DepartmentId;
+				employeeModel.TaxId = employee.TaxId;
+				employeeModel.PhoneNumber = employee.PhoneNumber;
+			}
+			
 
 			var updatedEmployee = context.Employees
-				.Update(employee).Entity;
+				.Update(employeeModel).Entity;
 			await context.SaveChangesAsync();
 
 			return updatedEmployee;
@@ -72,10 +91,18 @@ namespace PVM.Service.Repository
 		public async Task<Employee> GetEmployeeByUserIdAsync(string userId)
 		{
 			var singleEmployee = await context.Employees
-								.Include(e => e.Address) // Address einbeziehen
-								.Include(e => e.Department)
-								.Include(e => e.ApplicationUser)
-								.FirstOrDefaultAsync(e => e.ApplicationUserId == userId);
+							.Include(e => e.Department)
+							.Include(e => e.Address)
+							.FirstOrDefaultAsync(e => e.ApplicationUserId == userId);
+			if (singleEmployee == null) return null;
+			return singleEmployee;
+		}
+
+		public async Task<Employee> GetManagerByDepartmentIdAsync(int departmentId)
+		{
+			var singleEmployee = await context.Employees
+							.Include(e => e.Address)
+							.FirstOrDefaultAsync(e => e.IsManager == true && e.DepartmentId == departmentId);
 			if (singleEmployee == null) return null;
 			return singleEmployee;
 		}

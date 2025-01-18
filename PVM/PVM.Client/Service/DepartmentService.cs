@@ -16,18 +16,12 @@ namespace PVM.Client.Service
 		{
 			var response = await httpClient.PostAsJsonAsync("api/Department/Add-Department", department);
 			var result = await response.Content.ReadFromJsonAsync<Department>();
-			//return response;
-			//var json = await response.Content.ReadAsStringAsync();
-			//var result = JsonConvert.DeserializeObject<Department>(json);
 			return result;
 		}
 
 		public async Task<List<Department>> GetAllDepartmentsAsync()
 		{
 			var response = await httpClient.GetFromJsonAsync<List<Department>>("api/Department/All-Departments");
-			//var json = await response.Content.ReadAsStringAsync();
-			//var result = JsonConvert.DeserializeObject<List<Department>>(json);
-			//var result = await response.Content.ReadFromJsonAsync<List<Department>>();
 			return response;
 
 		}

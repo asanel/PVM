@@ -9,6 +9,7 @@ namespace PVM.Data
 		public DbSet<Employee> Employees { get; set; }
 		public DbSet<Address> Addresses { get; set; }
 		public DbSet<Department> Departments { get; set; }
+		public DbSet<AbsenceEntry> AbsenceEntries { get; set; }
 
 
 		protected override void OnModelCreating(ModelBuilder builder)
@@ -22,40 +23,19 @@ namespace PVM.Data
 				.WithOne()
 				.HasForeignKey<Employee>(f => f.AddressId)
 				.OnDelete(DeleteBehavior.Restrict);
-			//// Beziehung zwischen Manager und Address
-			//builder.Entity<Manager>()
-			//	.HasOne(f => f.Address)
-			//	.WithOne()
-			//	.HasForeignKey<Manager>(f => f.AddressId)
-			//	.OnDelete(DeleteBehavior.Restrict); 
-			// Beziehung zwischen Department und Employee
-			//builder.Entity<Employee>()
-			//	.HasOne(e => e.Department)
-			//	.WithMany(d => d.Employees) 
-			//	.HasForeignKey(e => e.DepartmentId)
-			//	.OnDelete(DeleteBehavior.Restrict); 
+			builder.Entity<Employee>()
+				.HasIndex(e => new { e.Firstname, e.Lastname })
+				.IsUnique();
 
-			//// Beziehung zwischen Department und Manager
-			//builder.Entity<Manager>()
-			//	.HasOne(m => m.Department)
-			//	.WithOne(d => d.Manager) // 1-zu-1-Beziehung
-			//	.HasForeignKey<Manager>(m => m.DepartmentId)
-			//	.OnDelete(DeleteBehavior.Restrict);
-
-
-			// Beziehung: ApplicationUser -> Employee (1:1)
 			builder.Entity<ApplicationUser>()
 				.HasOne(u => u.Employee)
 				.WithOne(e => e.ApplicationUser)
 				.HasForeignKey<ApplicationUser>(u => u.EmployeeId)
 				.OnDelete(DeleteBehavior.Restrict);
 
-			//	// Beziehung: ApplicationUser -> Manager (1:1)
-			//	builder.Entity<ApplicationUser>()
-			//		.HasOne(u => u.Manager)
-			//		.WithOne(m => m.ApplicationUser) 
-			//		.HasForeignKey<ApplicationUser>(u => u.ManagerId)
-			//		.OnDelete(DeleteBehavior.Restrict); 
+			builder.Entity<Department>()
+				.HasIndex(d => d.Name)
+				.IsUnique();
 		}
 	}
 }

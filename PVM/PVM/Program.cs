@@ -8,6 +8,7 @@ using PVM.Components.Account;
 using PVM.Data;
 using PVM.Service.Repository;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.NewtonsoftJson;
 using Microsoft.Extensions.Options;
 
 
@@ -33,6 +34,7 @@ builder.Services.AddAuthentication(options =>
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 	options.UseSqlServer(connectionString));
+
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
@@ -45,6 +47,7 @@ builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSe
 
 builder.Services.AddScoped<IAccountRepository, AccountRepository>();
 builder.Services.AddScoped<IDepartmentRepository, DepartmentRepository>();
+builder.Services.AddScoped<IEntryRepository, EntryRepository>();
 
 builder.Services.AddScoped(http => new HttpClient
 {
@@ -57,7 +60,10 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddControllers(options =>
 {
 	options.Filters.Add(new IgnoreAntiforgeryTokenAttribute());
-});
+}).AddNewtonsoftJson(options =>
+{
+	options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+}); ;
 builder.Services.AddCors(options =>
 {
 	options.AddPolicy("AllowAll", policy =>

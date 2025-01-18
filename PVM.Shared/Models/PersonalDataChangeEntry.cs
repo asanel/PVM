@@ -10,7 +10,7 @@ namespace PVM.Shared.Models
 		public int EmployeeId { get; set; }
 		public Employee Employee { get; set; }
 		public int ManagerId { get; set; }
-		public Manager Manager { get; set; }
+		public Employee Manager { get; set; }
 
 		public StatusEnums Status { get; set; }
 		public DateTime CreationDate { get; set; }

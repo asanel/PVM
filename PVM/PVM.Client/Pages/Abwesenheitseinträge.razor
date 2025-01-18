@@ -1,43 +1,85 @@
 ﻿@using PVM.Models
+@using PVM.Shared.DTOs
+@using PVM.Client.Service.Repository
 
 @page "/eintraege"
 
-<form class="form-container">
-    <div>
-        <label>Art der Abwesenheit</label>
-        <select class="form-select" @bind="AbsenceEntry.Type">
-            <option value="0">Urlaub</option>
-            <option value="1">Krankmeldung</option>
-            <option value="2">Andere</option>
-        </select>
+@inject IEntryRepository entryService;
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject IAccountRepository accountService;
+
+<EditForm Model="absenceEntry" OnValidSubmit="SubmitRequest" FormName="addentry">
+    <div class="row">
+        <label>Art der Abwedenheit</label>
+        <InputSelect class="form-control" @bind-Value="absenceEntry.Type">
+            <option value="">Auswählen</option>
+            <option value="Urlaub">Urlaub</option>
+            <option value="Krankmeldung">Krankmeldung</option>
+        </InputSelect>
     </div>
-
     <div>
-        <label>Von</label>
-        <input type="date" @bind="AbsenceEntry.StartDate" />
+        <label>Start Date</label>
+        <InputDate class="form-control" @bind-Value="absenceEntry.StartDate" />
     </div>
-
     <div>
-        <label>Bis</label>
-        <input type="date" @bind="AbsenceEntry.EndDate" />
+        <label>End Date</label>
+        <InputDate class="form-control" @bind-Value="absenceEntry.EndDate" />
     </div>
-
-    <div>
-        <label>Genehmiger</label>
-        <input type="text" />
-    </div>
+    <button class="btn btn-primary" type="submit">Submit</button>
+</EditForm>
 
 
-    <button>Senden</button>
-</form>
-
-        
 
 
-    @code {
-        private AbsenceEntry AbsenceEntry = new AbsenceEntry();
-        
+
+@code {
+    [SupplyParameterFromForm]
+    private AbsenceEntry absenceEntry {get; set;} = new AbsenceEntry();
+    private Employee employee = new Employee();
+    private Employee manager = new Employee();
+    public async Task SubmitRequest()
+    {
+        absenceEntry.Status = "New";
+        absenceEntry.CreationDate = DateTime.Now;
+        absenceEntry.DepartmentId = employee.DepartmentId;
+        absenceEntry.EmployeeId = employee.Id;
+        absenceEntry.ManagerId = 10;
+        var response = await entryService.AddAbsenceEntryAsync(absenceEntry);
     }
+
+    protected override async void OnInitialized()
+    {
+
+        this.LoadEmployee();
+        // Initialisiere das heutige Datum
+        absenceEntry.StartDate = DateTime.Today;
+        absenceEntry.EndDate = DateTime.Today.AddDays(1); // Beispiel: Morgen
+
+    }
+    private async Task LoadEmployee()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity != null && user.Identity.IsAuthenticated)
+        {
+            var userId = user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            // Sende die GET-Anfrage und prüfe auf Erfolg
+            var response = await accountService.GetEmployeeByUserIdAsync(userId);
+            if (response != null)
+            {
+                employee = response;
+                // manager = await this.LoadManager(employee.DepartmentId);
+            }
+        }
+    }
+    // private async Task<Employee> LoadManager(int id)
+    // {
+
+    //         var response = await accountService.GetManagerByDepartmentIdAsync(id);
+    //         return response; 
+    // }
+}
 
     <style>
         .form-container {

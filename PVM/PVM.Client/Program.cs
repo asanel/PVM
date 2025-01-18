@@ -23,5 +23,6 @@ builder.Services.AddScoped(http => new HttpClient
 
 builder.Services.AddScoped<IAccountRepository, AccountService>();
 builder.Services.AddScoped<IDepartmentRepository,DepartmentService>();
+builder.Services.AddScoped<IEntryRepository, EntryService>();
 
 await builder.Build().RunAsync();

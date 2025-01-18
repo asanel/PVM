@@ -1,7 +1,9 @@
 ﻿using Newtonsoft.Json;
 using PVM.Client.Service.Repository;
 using PVM.Models;
+using PVM.Shared.DTOs;
 using System.Net.Http.Json;
+using System.Reflection.Metadata.Ecma335;
 
 namespace PVM.Client.Service
 {
@@ -70,7 +72,59 @@ namespace PVM.Client.Service
 			try
 			{
 				// Sende die GET-Anfrage und prüfe auf Erfolg
-				var response = await httpClient.GetAsync($"api/Account/Get-Single-EmployeeByUserId");
+				var response = await httpClient.GetAsync($"api/Account/Get-Single-EmployeeByUserId/{userId}");
+				if (!response.IsSuccessStatusCode)
+				{
+					// Fehlerbehandlung bei nicht erfolgreichem Statuscode
+					var errorContent = await response.Content.ReadAsStringAsync();
+					throw new HttpRequestException($"Fehler beim Abrufen der Daten: {response.StatusCode}, Nachricht: {errorContent}");
+				}
+
+				// JSON in ein Employee-Objekt deserialisieren
+				var employee = await response.Content.ReadFromJsonAsync<Employee>();
+				return employee ?? throw new Exception("Employee-Daten sind leer.");
+			}
+			catch (HttpRequestException ex)
+			{
+				// Behandlung von HTTP-spezifischen Fehlern
+				Console.WriteLine($"HTTP-Fehler: {ex.Message}");
+				throw;
+			}
+			catch (Exception ex)
+			{
+				// Allgemeine Fehlerbehandlung
+				Console.WriteLine($"Ein Fehler ist aufgetreten: {ex.Message}");
+				throw;
+			}
+		}
+
+		public async Task<Employee> UpdateEmployeeAsync(EmployeeDto employee)
+		{
+			// Serialisiere das DTO zu JSON
+			var content = JsonContent.Create(employee);
+
+			// Sende die Patch-Anfrage
+			var response = await httpClient.PatchAsync("Update-Employee", content);
+
+			// Überprüfe, ob die Anfrage erfolgreich war
+			if (!response.IsSuccessStatusCode)
+			{
+				Console.WriteLine($"Update failed with status code: {response.StatusCode}");
+				return null;
+			}
+
+			// Deserialisiere die Antwort zu einem Employee-Objekt
+			var updatedEmployee = await response.Content.ReadFromJsonAsync<Employee>();
+			return updatedEmployee;
+		}
+		
+
+		public async Task<Employee> GetManagerByDepartmentIdAsync(int departmentId)
+		{
+			try
+			{
+				// Sende die GET-Anfrage und prüfe auf Erfolg
+				var response = await httpClient.GetAsync($"api/Account/Get-Single-ManagerByDepartmentId/{departmentId}");
 				if (!response.IsSuccessStatusCode)
 				{
 					// Fehlerbehandlung bei nicht erfolgreichem Statuscode

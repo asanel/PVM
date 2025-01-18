@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using PVM.Client.Service.Repository;
 using PVM.Models;
+using PVM.Shared.DTOs;
 
 
 
@@ -54,8 +55,8 @@ namespace PVM.Controller
 			return Ok(newEmployee);
 		}
 
-		[HttpPut("Update-Employee")]
-		public async Task<ActionResult<Employee>> UpdateEmployee(Employee employee)
+		[HttpPatch("Update-Employee")]
+		public async Task<ActionResult<Employee>> UpdateEmployee([FromBody] EmployeeDto employee)
 		{
 			var newEmployee = await repository.UpdateEmployeeAsync(employee);
 
@@ -68,10 +69,18 @@ namespace PVM.Controller
 			return Ok(employees);
 		}
 		[HttpPatch("Update-Address")]
-		public async Task<ActionResult<Address>> UpdateAddress(Address addres)
+		public async Task<ActionResult<Address>> UpdateAddress(Address address)
 		{
-			var newAddess = await repository.UpdateAddressAsync(addres);
+			var newAddess = repository.UpdateAddressAsync(address);
 			return Ok(newAddess);
+		}
+
+		[HttpGet("Get-Single-ManagerByDepartmentId/{departmentId}")]
+		public async Task<ActionResult<Employee>> GetManagerByDepartmentId(int departmentId)
+		{
+			var response = await repository.GetManagerByDepartmentIdAsync(departmentId);
+
+			return Ok(response);
 		}
 
 

@@ -1,22 +1,25 @@
 ﻿//using PVManage.Enums;
 
+using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
+
 namespace PVM.Models
 {
 	public class AbsenceEntry
 	{
+		[Key]
 		public int Id { get; set; }
-		public string Name { get; set; }
-		public Employee Employee { get; set; }
-		public Manager Manager { get; set; }
+		public int EmployeeId { get; set;  }
+		public int DepartmentId { get; set; }
+		public int ManagerId { get; set; }
 		public DateTime StartDate { get; set; }
-		public DateTime EndDate { get; set; }
-		//public AbsenceEntryTypeEnums Type { get; set; }
+		public DateTime EndDate { get; set; }		
 		public string Type { get; set; }
-		//public StatusEnums Status { get; set; }
 		public string Status { get; set; }
 		public DateTime CreationDate { get; set; }
-		public int Duration { get; set; }
 
-		public Approval Approval { get; set; }
+
 	}
 }

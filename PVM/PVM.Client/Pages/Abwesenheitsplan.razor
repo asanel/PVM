@@ -1,290 +1,159 @@
 ﻿@page "/abwesenheitsplan"
 @using System
 @using System.Data
-@using BlazorCalendar
-@using BlazorCalendar.Models
 @using System.Collections.Generic;
+@using BlazorCalendar
+@using BlazorCalendar.Models;
 @using Newtonsoft.Json;
+@using PVM.Client.Service.Repository;
 
 
 @inject NavigationManager NavigationManager
+@inject IAccountRepository accountService;
+@inject IEntryRepository entryService;
+
+@inject AuthenticationStateProvider AuthenticationStateProvider
 
 
 
 <div style="padding-bottom:20px">
 
-<div class="tabs">
-    
-    @if(!IsTeamAbsences)
-    {
-        <button @onclick="MyAbsences" class="tab selected">Meine </button>
-        <button @onclick="TeamAbsences" class="tab">Kollegen</button>
-    }
-    else
-    {
-        <button @onclick="MyAbsences" class="tab">Meine </button>
-        <button @onclick="TeamAbsences" class="tab selected">Kollegen</button>
-    }
-</div>
-<div>
-
-    <button @onclick="@(m => ClickMonthNavigate(1))"> + </button>
-    <button @onclick="@(m => ClickMonthNavigate(-1))">- </button>
-    <input type="date" @bind="today" />
-</div>
-
-<CalendarContainer   FirstDate="today" DisplayedView="DisplayedView.Monthly" TasksList="TasksList.ToArray()">
-    <MonthlyView   />
-</CalendarContainer>
-
-<div class="filter-section">
-    <label>Filter</label>
-    <select @bind="colum" >
-        <option value="Ersteller">Ersteller</option>
-        <option value="Genehmiger">Genehmiger</option>
-        <option value="Anfangsdatum">Anfangsdatum</option>
-        <option value="Enddatum">Enddatum</option>
-        <option value="Typ">Typ</option>
-        <option value="Status">Status</option>
-        <option value="ErstellDatum">ErstellDatum</option>
-    </select>
-    <select @bind="filter">
-        <option value="ist">ist</option>
-        <option value="Beginnt mit">Beginnt mit</option>
-        <option value="Beinhaltet">Beinhaltet</option>
-    </select>
-    <input @bind="value" type="text" />
-    <button @onclick="ApplyFilter">Anwenden</button>
-    <button @onclick="ResetFilter">Zurücksetzen</button>
-</div>
-<label>Aktueller Filter: @appliedFilter</label>
-<br />
-<div>
-    <button @onclick="NavigateToNewAbsence"> Neue Abwesenheit </button>
-</div>
+    <!-- Tabs -->
+    <ul class="nav nav-tabs">
+        <li class="nav-item">
+            <button class="nav-link @(activeTab ? "active" : "")" @onclick="() => SwitchTab(true)">
+                Meine
+            </button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link @(!activeTab ? "active" : "")" @onclick="() => SwitchTab(false)">
+                Kollegen
+            </button>
+        </li>
+    </ul>
+    <!-- Kalender -->
+    <CalendarContainer FirstDate="currentDate" DisplayedView="DisplayedView.Monthly" TasksList="TasksList.ToArray()">
+        <MonthlyView />
+    </CalendarContainer>
 
 
-<table class="absence-table">
-    <thead>
-        <tr>
-            <th>Name</th>
-            <th>Von</th>
-            <th>Bis</th>
-            <th>Typ</th>
-            <th>Status</th>
-        </tr>
-    </thead>
-    
-    <tbody>
-        @foreach (var entry in absenceEntries)
-        {
-            <tr @onclick="@(m => ClickMonthNavigate(1))">
-                <td>@entry.Name</td>
-                <td>@entry.StartDate.ToShortDateString()</td>
-                <td>@entry.EndDate.ToShortDateString()</td>
-                <td>@entry.Type</td>
-                <td>@entry.Status</td>
+    <br />
+    <div>
+        <button @onclick="NavigateToNewAbsence"> Neue Abwesenheit </button>
+    </div>
+
+
+    <table class="absence-table">
+        <thead>
+            <tr>
+                <th>Von</th>
+                <th>Bis</th>
+                <th>Typ</th>
+                <th>Status</th>
             </tr>
-        }
-    </tbody>
-  
+        </thead>
+
+        <tbody>
+            @foreach (var entry in absenceEntries)
+            {
+                <tr @onclick="@(m => ClickMonthNavigate(1))">
+                    <td>@entry.StartDate.ToShortDateString()</td>
+                    <td>@entry.EndDate.ToShortDateString()</td>
+                    <td>@entry.Type</td>
+                    <td>@entry.Status</td>
+                </tr>
+            }
+        </tbody>
 
 
 
-</table>
+
+    </table>
 
 </div>
 
 
 @code {
+    private List<AbsenceEntry> absenceEntries = new List<AbsenceEntry>();
     private List<Tasks> TasksList = new List<Tasks> {};
+    private bool activeTab = true;
+    private DateTime StartDate = DateTime.Today.AddMonths(-1);
+    private DateTime EndDate = DateTime.Today.AddMonths(1);
+
     private int months = 12;
-    private DateTime today = DateTime.Today;
-
-    private DateTime? filterFromDate;
-    private string filterCriteria = "is";
-    private DateTime? filterDate = DateTime.Today;
-
+    private DateTime currentDate = DateTime.Today;
 
     public bool IsTeamAbsences;
 
-    public string colum = "";
-    public string filter = "";
-    public string value = "";
-    public string appliedFilter = "";
 
-
-    void ClickMonthNavigate(int Months)
+    private async Task SwitchTab(bool status)
     {
-        
-        today = today.AddMonths(Months);
+        activeTab = status;
+        await LoadTabData();
     }
 
-    void NavigateToNewAbsence()
-    {
-        NavigationManager.NavigateTo("/neueabwesenheit");
-    }
-
-    // void UpdateAbsenceEntires(HttpResponseMessage response)
-    // {
-    //     absenceEntries.Clear();
-    //     DataTable dataTable = new DataTable();
-    //     if (response.IsSuccessStatusCode)
-    //     {
-    //         var dataObjects = response.Content.ReadAsStringAsync().Result;
-    //         var result = response.Content.ReadAsStringAsync().Result;
-    //         dataTable = JsonConvert.DeserializeObject<DataTable>(result);
-
-    //     }
-    //     else
-    //     {
-    //         Console.WriteLine("{0} ({1})", (int)response.StatusCode, response.ReasonPhrase);
-    //     }
-    //     DataRow drCreator;
-    //     DataRow drApprover;
-        
-    //     foreach (DataRow row in dataTable.Rows)
-    //     {
-
-
-    //         response = client.GetAsync("GetAccount/" + row.Field<Int64>("Ersteller").ToString()).Result;
-    //         if (response.IsSuccessStatusCode)
-    //         {
-    //             var dataObjects = response.Content.ReadAsStringAsync().Result;
-    //             var result = response.Content.ReadAsStringAsync().Result;
-    //             drCreator = JsonConvert.DeserializeObject<DataTable>(result).Rows[0];
-    //         }
-    //         else
-    //         {
-    //             drCreator = null;
-    //             Console.WriteLine("{0} ({1})", (int)response.StatusCode, response.ReasonPhrase);
-    //         }
-    //         response = client.GetAsync("GetAccount/" + row.Field<Int64>("Genehmiger").ToString()).Result;
-    //         if (response.IsSuccessStatusCode)
-    //         {
-    //             var dataObjects = response.Content.ReadAsStringAsync().Result;
-    //             var result = response.Content.ReadAsStringAsync().Result;
-    //             drApprover = JsonConvert.DeserializeObject<DataTable>(result).Rows[0];
-    //         }
-    //         else
-    //         {
-    //             drApprover = null;
-    //             Console.WriteLine("{0} ({1})", (int)response.StatusCode, response.ReasonPhrase);
-    //         }
-
-
-
-    //         absenceEntries.Add(new AbsenceEntry
-    //             {
-    //                 Type = row.Field<string>("Typ"),
-    //                 Name = drCreator.Field<string>("Name"),
-    //                 Id = Convert.ToInt32(row.Field<Int64>("AbwesenheitsantragID")),
-    //                 StartDate = row.Field<DateTime>("Anfangsdatum"),
-    //                 EndDate = row.Field<DateTime>("Enddatum"),
-    //                 Duration = 3,
-    //                 Status = row.Field<string>("Status"),
-    //                 Employee = new Employee
-    //                 {
-    //                     Id = Convert.ToInt32(drCreator.Field<Int64>("KontoID")),
-    //                     Lastname = drCreator.Field<string>("Name"),
-    //                 },
-    //                 Manager = new Manager
-    //                 {
-    //                     Id = Convert.ToInt32(drApprover.Field<Int64>("KontoID")),
-    //                     Lastname = drApprover.Field<string>("Name")
-    //                 }
-    //             });
-
-    //     }
-    // }
     void UpdateTasks()
     {
         TasksList.Clear();
         foreach (AbsenceEntry Data in absenceEntries)
         {
-            TasksList.Add(new Tasks { ID = Convert.ToInt32(Data.Id), DateStart = Data.StartDate, DateEnd = Data.EndDate, Code = Data.Name, Color = "#19C319", Caption = "Lorem ipsum dolor sit amet" });
+            if(Data.Status == "Genehmigt"){
+                TasksList.Add(new Tasks { ID = Convert.ToInt32(Data.Id), DateStart = Data.StartDate, DateEnd = Data.EndDate, Code = Data.Type, Color = "#19C319", Caption = "test" });
+            }
+            
         }
     }
 
-    void SomeStartupMethod()
+    void ClickMonthNavigate(int Months)
     {
 
-
-
-        // HttpResponseMessage response = client.GetAsync("GetAbsenceEntries/"+LoggedUser.Id).Result;
-        // UpdateAbsenceEntires(response);
-
-        // UpdateTasks();
-
+        currentDate = currentDate.AddMonths(Months);
     }
 
-    Task SomeStartupTask()
+    void NavigateToNewAbsence()
     {
-        // Do some task based work
-        return Task.CompletedTask;
+        NavigationManager.NavigateTo("/eintraege");
     }
+
+
 
     protected override async Task OnInitializedAsync()
     {
-
-
-        SomeStartupMethod();
-        await SomeStartupTask();
+        await LoadTabData();
+    }
+    private async Task LoadTabData()
+    {
+        if (activeTab == true)
+        {
+            var employeeId = await GetCurrentUserId();
+            absenceEntries = await entryService.GetAllAbsenceEntriesByEmployeeIdAsync(employeeId);
+            UpdateTasks();
+        }
+        else if (activeTab == false)
+        {
+            absenceEntries = await entryService.GetAllAbsenceEntriesAsync();
+            UpdateTasks();
+        }
     }
 
-
-
-
-    private List<AbsenceEntry> absenceEntries = new List<AbsenceEntry>
+    private async Task<int> GetCurrentUserId()
     {
-        //test
-    };
-    private void ApplyFilter()
-    {
+        int employeeId = 0;
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
 
-        // try
-        // {
-        //     appliedFilter = colum + " " + filter + " " + value;
+        if (user.Identity != null && user.Identity.IsAuthenticated)
+        {
+            var userId = user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            // Sende die GET-Anfrage und prüfe auf Erfolg
+            Employee response = await accountService.GetEmployeeByUserIdAsync(userId);
+            if (response != null)
+            {
+                employeeId = response.Id;
 
-        //     HttpResponseMessage response = client.GetAsync("GetAbsenceEntriesByFilter?Creator=" + LoggedUser.Id + "&Column=" + colum + "&Filter=" + filter + "&Value=" + value).Result;
-        //     UpdateAbsenceEntires(response);
-        //     UpdateTasks();
-
-        // }
-        // catch
-        // {
-        //     Console.WriteLine("Error");
-        // }
-    }
-    private void ResetFilter()
-    {
-        // appliedFilter = "";
-        // HttpResponseMessage response = client.GetAsync("GetAbsenceEntries/" + LoggedUser.Id).Result;
-        // UpdateAbsenceEntires(response);
-        // UpdateTasks();
-
-    }
-
-    private void MyAbsences()
-    {
-
-        // IsTeamAbsences = false;
-
-        // HttpResponseMessage response = client.GetAsync("GetAbsenceEntries/" + LoggedUser.Id).Result;  // Blocking call! Program will wait here until a response is received or a timeout occurs.
-        // UpdateAbsenceEntires(response);
-        // UpdateTasks();
-
-
-    }
-    private void TeamAbsences()
-    {
-        // IsTeamAbsences = true;
-        // HttpResponseMessage response = client.GetAsync("GetTeamAbsenceEntries?Team=" + LoggedUser.Department.Id).Result;  // Blocking call! Program will wait here until a response is received or a timeout occurs.
-        // UpdateAbsenceEntires(response);
-        // UpdateTasks();
-        //SQL Abfrage hier senden:
-        // Select * From Abwesenheitsanträge
-        // Where Ersteller = (Select KontoID From Personaldaten Where Abteilung = (Select Abteilung From Personaldaten Where KontoID = (ID des aktuellen Kontos)))
+            }
+        }
+        return employeeId;
     }
 
 }

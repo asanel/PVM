@@ -13,12 +13,13 @@
 @inject IJSRuntime JsRuntime
 
 @inject IAccountRepository AccountService
+@inject IDepartmentRepository departmentService;
 
 <h3>Neuen Mitarbeiter registrieren</h3>
 
 <div class="row">
     <div class="col-md-12">
-        <EditForm Model="Model" OnInvalidSubmit="RegisterUser" method="post" FormName="adduser">
+        <EditForm Model="Model" OnValidSubmit="RegisterUser" method="post" FormName="adduser">
             <div class="row">
                 <div class="col-md-4 mb-3">
                     <label>Vorname</label>
@@ -36,7 +37,13 @@
                 </div>
                 <div class="col-md-4 mb-3">
                     <label>Abteilung</label>
-                    <InputSelect class="form-control" @bind-value="Model.DepartmentId"/>
+                    <InputSelect class="form-control" @bind-value="Model.DepartmentId">
+                        <option value="">Auswählen</option>
+                        @foreach (var department in Departments)
+                        {
+                            <option value="@department.Id">@department.Name</option>
+                        }
+                    </InputSelect>
                 </div>
             </div>
             <div class="row">
@@ -85,7 +92,7 @@
                         <label>Geburtsdatum</label>
                         <InputDate class="form-control" @bind-value="Model.DateOfBirth" />
                     </div>
-                    <div class="input-group col mb-3">
+                    <div class="input-group col-md-4 mb-3">
                         <label class="input-group-text">Familienstand</label>
                         <InputSelect class="form-control" @bind-value="Model.MaritalStatus">
                             <option selected>Auswählen</option>
@@ -116,8 +123,13 @@
 
     [SupplyParameterFromForm]
     private RegisterViewModel Model { get; set; } = new ();
+    private List<Department> Departments = new List<Department>();
     private string? Message => identityErrors is null ? null : $"Error: {string.Join(", ", identityErrors.Select(error => error.Description))}";
 
+    protected override async Task OnInitializedAsync()
+    {
+        Departments = await departmentService.GetAllDepartmentsAsync();
+    }
 
     protected async Task RegisterUser() 
     {
@@ -145,19 +157,6 @@
         return address;
     }
 
-    // private Manager CreateManager(){
-    //     Manager manager = new Manager();
-    //     manager.Firstname = Model.Firstname;
-    //     manager.Lastname = Model.Lastname;
-    //     manager.Position = Model.Position;
-    //     manager.DepartmentId = 1;
-    //     manager.EmailAddress = Model.EmailAddress;
-    //     manager.PhoneNumber = Model.PhoneNumber;
-    //     manager.TaxId = Model.TaxId;
-    //     manager.DateOfBirth = Model.DateOfBirth;
-    //     manager.MaritalStatus = Model.MaritalStatus;
-    //     return manager;
-    // }
 
     private Employee CreateEmployee()
     {
@@ -165,7 +164,7 @@
         employee.Firstname = Model.Firstname;
         employee.Lastname = Model.Lastname;
         employee.Position = Model.Position;
-        employee.DepartmentId = 1;
+        employee.DepartmentId = Model.DepartmentId;
         employee.EmailAddress = Model.EmailAddress;
         employee.PhoneNumber = Model.PhoneNumber;
         employee.TaxId = Model.TaxId;
@@ -194,7 +193,7 @@
         string userId = await userManager.GetUserIdAsync(user);
         user.EmailConfirmed = true;
         user.PhoneNumberConfirmed = true;
-        user.Email = $"test@test.com";
+        user.Email = $"{model.Firstname.ToLower()}.{model.Lastname.ToLower()}@pvm.com";
 
 
         if (model.IsManager)

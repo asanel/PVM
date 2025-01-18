@@ -1,0 +1,68 @@
+﻿@page "/employee_list"
+
+@using PVM.Client.Service.Repository;
+
+
+
+@inject IAccountRepository accountService;
+@inject NavigationManager NavigationManager
+
+<h3>Mitarbeiterliste</h3>
+
+@if (employees == null)
+{
+    <p>Lade Mitarbeiterdaten...</p>
+}
+else if (!employees.Any())
+{
+    <p>Keine Mitarbeiter gefunden.</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Vorname</th>
+                <th>Nachname</th>
+                <th>Position</th>
+                <th>Aktionen</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var employee in employees)
+            {
+                <tr>
+                    <td>@employee.Firstname</td>
+                    <td>@employee.Lastname</td>
+                    <td>@employee.Position</td>
+                    <td>
+                        <button class="btn btn-primary" @onclick="() => EditEmployee(employee.Id)">Bearbeiten</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<Employee> employees;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            // API-Aufruf zur Abholung der Mitarbeiterdaten
+            employees = await accountService.GetAllEmployeesAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Fehler beim Laden der Mitarbeiterdaten: {ex.Message}");
+        }
+    }
+
+    private void EditEmployee(int employeeId)
+    {
+        // Weiterleitung zur Bearbeitungsseite mit der Mitarbeiter-ID
+        NavigationManager.NavigateTo($"/edit-employee/{employeeId}");
+    }
+}
